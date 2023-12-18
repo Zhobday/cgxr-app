@@ -1,9 +1,7 @@
-// CameraFeed.tsx
-
 import React, { useEffect, useRef, useState } from 'react';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs';
-import Posetable from './Posetable'; // Adjust the import path based on your project structure
+import Posetable from './Posetable';
 import { PixelInput } from '@tensorflow-models/pose-detection/dist/shared/calculators/interfaces/common_interfaces';
 
 const CameraFeed: React.FC = () => {
@@ -11,8 +9,7 @@ const CameraFeed: React.FC = () => {
   const [poses, setPoses] = useState<any[]>([]);
 
   useEffect(() => {
-
-    const detectPoses =async () => {
+    const detectPoses = async () => {
       try {
         const detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
         const currentFramePoses = await detector.estimatePoses(videoRef.current as PixelInput);
@@ -20,45 +17,40 @@ const CameraFeed: React.FC = () => {
       } catch (error) {
         console.error('Error during pose detection:', error);
       }
-    }
+    };
+
     const initCamera = async () => {
-        try {
-          await tf.ready();
-      
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-      
-            // Wait for the video metadata to be loaded
-            await new Promise((resolve) => {
-              videoRef.current?.addEventListener('loadedmetadata', resolve);
-            });
-      
-            // Ensure video stream is available
-            if (videoRef.current.srcObject && videoRef.current.srcObject.active) {
-              detectPoses();
-            }
+      try {
+        await tf.ready();
+
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+
+          // Wait for the video metadata to be loaded
+          await new Promise((resolve) => {
+            videoRef.current?.addEventListener('loadedmetadata', resolve);
+          });
+
+          // Ensure video stream is available
+          if (videoRef.current.srcObject && videoRef.current.srcObject.active) {
+            // Call detectPoses every second
+            const intervalId = setInterval(detectPoses, 1000);
+
+            // Cleanup function
+            return () => {
+              clearInterval(intervalId);
+            };
           }
-        } catch (error) {
-          console.error('Error accessing camera:', error);
         }
-      };
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+      }
+    };
 
     initCamera();
-
-    // Cleanup function
-    return () => {
-      // Release the camera stream and perform other cleanup
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
-      }
-
-      // Dispose of any TensorFlow.js resources if needed
-      tf.disposeVariables();
-    };
-  },);
+  }, []);
 
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
@@ -81,10 +73,10 @@ const CameraFeed: React.FC = () => {
           boxSizing: 'border-box',
         }}
       >
-      {/* Render detected poses using the PoseTable component */}
-      {Array.isArray(poses) && poses.map((pose, index) => (
-        <Posetable key={index} pose={pose} />
-      ))}
+        {/* Render detected poses using the PoseTable component */}
+        {Array.isArray(poses) && poses.map((pose, index) => (
+          <Posetable key={index} pose={pose} />
+        ))}
 
         {/* Your buttons or controls */}
         <button onClick={() => console.log('Button Clicked')}>Function 1</button>

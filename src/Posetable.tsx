@@ -18,7 +18,14 @@ interface PoseTableProps {
 
 const PoseTable: React.FC<PoseTableProps> = ({ pose }) => {
   return (
-    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+    <table 
+      style={{
+           width: '100%',
+           height:'100%',
+           borderCollapse: 'collapse',
+           color:'green',
+           fontSize:'12px'
+          }}>
       <thead>
         <tr>
           <th>Score</th>
