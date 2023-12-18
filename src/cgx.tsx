@@ -7,13 +7,17 @@ import { PixelInput } from '@tensorflow-models/pose-detection/dist/shared/calcul
 const CameraFeed: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [poses, setPoses] = useState<any[]>([]);
+  const detectorRef = useRef<poseDetection.PoseDetector>();
 
   useEffect(() => {
     const detectPoses = async () => {
       try {
-        const detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
-        const currentFramePoses = await detector.estimatePoses(videoRef.current as PixelInput);
-        setPoses(currentFramePoses);
+        if (!detectorRef.current) {
+          detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
+        }
+
+        const currentFramePoses = await detectorRef.current?.estimatePoses(videoRef.current as PixelInput);
+        setPoses(currentFramePoses || []);
       } catch (error) {
         console.error('Error during pose detection:', error);
       }
@@ -35,12 +39,22 @@ const CameraFeed: React.FC = () => {
 
           // Ensure video stream is available
           if (videoRef.current.srcObject && videoRef.current.srcObject.active) {
-            // Call detectPoses every second
-            const intervalId = setInterval(detectPoses, 1000);
+            // Call detectPoses every second using requestAnimationFrame
+            const animate = () => {
+              detectPoses();
+              requestAnimationFrame(animate);
+            };
+
+            animate();
 
             // Cleanup function
             return () => {
-              clearInterval(intervalId);
+              if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+                tracks.forEach((track) => track.stop());
+              }
+              // tf.dispose(detectorRef.current); // Remove this line if not needed
+              tf.disposeVariables();
             };
           }
         }
