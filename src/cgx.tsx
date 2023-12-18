@@ -11,12 +11,21 @@ const CameraFeed: React.FC = () => {
   const [poses, setPoses] = useState<any[]>([]);
 
   useEffect(() => {
+
+    const detectPoses =async () => {
+      try {
+        const detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
+        const currentFramePoses = await detector.estimatePoses(videoRef.current as PixelInput);
+        setPoses(currentFramePoses);
+      } catch (error) {
+        console.error('Error during pose detection:', error);
+      }
+    }
     const initCamera = async () => {
         try {
           await tf.ready();
       
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          const detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
       
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
@@ -28,11 +37,7 @@ const CameraFeed: React.FC = () => {
       
             // Ensure video stream is available
             if (videoRef.current.srcObject && videoRef.current.srcObject.active) {
-              // Perform TensorFlow.js operations, e.g., pose detection
-                setInterval(async () =>{
-                    const newPoses = await detector.estimatePoses(videoRef.current as PixelInput)
-                    setPoses(newPoses);
-                }, 200)
+              detectPoses();
             }
           }
         } catch (error) {

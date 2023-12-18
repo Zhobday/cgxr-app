@@ -23,8 +23,6 @@ const PoseTable: React.FC<PoseTableProps> = ({ pose }) => {
         <tr>
           <th>Score</th>
           <th>Keypoints</th>
-          <th>Keypoints 3D</th>
-          <th>Segmentation</th>
         </tr>
       </thead>
       <tbody>
@@ -33,7 +31,7 @@ const PoseTable: React.FC<PoseTableProps> = ({ pose }) => {
           <td>
             <ul>
               {pose.keypoints.map((keypoint, index) => (
-                <li key={index}>{`${keypoint.name}: (${keypoint.x}, ${keypoint.y}, ${keypoint.score})`}</li>
+                <li key={index}>{`${keypoint.name}: ('x=${keypoint.x}, y=${keypoint.y}, score=${keypoint.score})`}</li>
               ))}
             </ul>
           </td>
