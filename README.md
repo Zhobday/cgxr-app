@@ -1,5 +1,7 @@
 # cgxr-app
-React Application For Rendering Real Time Motion Capture Data from Pose-Detector API
+
+React Application For Rendering Real Time Motion Capture Data from Pose-Detector API.
+newPoses in CGX is currently tracking the Keypoint Data from Pose-Detector, next step is to store these values in a React State so they can be dynamically shown on screen. 
 
 ## Available Scripts
 
