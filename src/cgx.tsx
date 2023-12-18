@@ -53,7 +53,6 @@ const CameraFeed: React.FC = () => {
                 const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
                 tracks.forEach((track) => track.stop());
               }
-              // tf.dispose(detectorRef.current); // Remove this line if not needed
               tf.disposeVariables();
             };
           }
