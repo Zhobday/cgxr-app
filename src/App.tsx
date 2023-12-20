@@ -5,6 +5,9 @@ import '@tensorflow/tfjs';
 const PoseDetectionComponent = () => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [model, setModel] = useState<tf.GraphModel | null>(null);
+    const cr = useRef<HTMLCanvasElement | null>(null);
+    const [poses, setPoses] = useState<any[]>([]);
+
 
   useEffect(() => {
     // Load the model when the component mounts
@@ -15,7 +18,6 @@ const PoseDetectionComponent = () => {
         if (loadedModel == null) {
             return;
           }else{
-              // Set the model in the component state
               setModel(loadedModel);
               console.log(model);
               return;
@@ -23,29 +25,89 @@ const PoseDetectionComponent = () => {
     };
 
     // Initialize the camera and load the model
-    const setupCameraAndModel = async () => {
+    const setupCamera = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     
             if (videoRef.current) {
               videoRef.current.srcObject = stream;
-              loadModel();
             }
           } catch (error) {
             console.error('Error accessing camera:', error);
           }
     };
-    setupCameraAndModel();
 
+    const calculateSize = () => {
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+  
+        // Ensure both width and height are multiples of 32
+        const maxWidth = Math.floor(windowWidth / 32) * 32;
+        const maxHeight = Math.floor(windowHeight / 32) * 32;
+  
+        // Set video and canvas size
+        if (videoRef.current) {
+          videoRef.current.width = maxWidth;
+          videoRef.current.height = maxHeight;
+        }
+  
+        if (cr.current) {
+          cr.current.width = maxWidth;
+          cr.current.height = maxHeight;
+        }
+      };
+
+      const detectPoses = () => {
+        const canvas = cr.current;
+        const video = videoRef.current;
+     
+        if (!video || !canvas) {return;}
+
+        const context = canvas.getContext('2d');
+
+        if (!context) {return;}
+
+        // Get image data from the canvas
+        context.drawImage(video,0,0,video.width,video.height)
+        const imageData = context.getImageData(0, 0, video.videoWidth, video.videoHeight);
+        const tensor = tf.browser.fromPixels(imageData, 4); // Assuming RGBA format
+        var framePoses = model?.predict(tensor);
+
+        const framePosesArray = Array.isArray(framePoses) ? framePoses : [framePoses];
+        setPoses(framePosesArray);
+      }
+
+      // Call calculateSize initially and add a resize event listener
+      const setupAndDetect = async() => {
+        await calculateSize();
+        await setupCamera();
+        await loadModel();
+        const intervalId = setInterval(() => detectPoses(),250);
+        return () =>{
+          clearInterval(intervalId)
+        };
+      }
+      setupAndDetect();
+      
+      window.addEventListener('resize', calculateSize);
+
+  
+      // Remove the event listener when the component unmounts
+      return () => {
+        window.removeEventListener('resize', calculateSize);
+      };
   }, []); // Empty dependency array to run the effect only once
 
   return (
     <div>
-      <video ref={videoRef} autoPlay playsInline muted />
-      <div>
+        <div>
+            <video ref={videoRef} autoPlay playsInline muted />
+            <canvas ref={cr} />
+        </div>
+    <div>
         <h2>Pose Information</h2>
         {/* Placeholder for displaying pose information */}
-      </div>
+    </div>
     </div>
   );
 };
