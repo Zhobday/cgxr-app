@@ -10,12 +10,12 @@ const CameraFeed: React.FC = () => {
   const detectorRef = useRef<poseDetection.PoseDetector>();
 
   useEffect(() => {
+    
     const detectPoses = async () => {
       try {
         if (!detectorRef.current) {
           detectorRef.current = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
         }
-
         const currentFramePoses = await detectorRef.current?.estimatePoses(videoRef.current as PixelInput);
         setPoses(currentFramePoses || []);
       } catch (error) {

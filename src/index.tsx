@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import Camera from './CameraFeed'
 import CGX from './cgx'
+import LoCap from './LoCap'
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
