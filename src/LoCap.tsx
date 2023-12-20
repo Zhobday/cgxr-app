@@ -40,13 +40,12 @@ const [model, setModel] = useState<tf.GraphModel | null>(null);
           const modelPath = 'http://localhost:5000/multipose-lightning';
           const loadedModel = await tf.loadGraphModel(`${modelPath}/model.json`);
           if (loadedModel == null) {
-            console.log('TS Could not load the model.');
             return;
+          }else{
+              // Set the model in the component state
+              setModel(loadedModel);
+              return;
           }
-          console.log('Model loaded successfully:', loadedModel);
-    
-          // Set the model in the component state
-          setModel(loadedModel);
             }
           } catch (error) {
             console.error('Error loading model:', error);

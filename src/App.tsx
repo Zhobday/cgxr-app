@@ -1,52 +1,53 @@
-// Import necessary dependencies from React and external libraries
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
+import * as tf from '@tensorflow/tfjs';
+import '@tensorflow/tfjs';
 
-// Define a functional component named App using React.FC (Functional Component)
-const App: React.FC = () => {
-    // State declarations using the useState hook to manage 'note' and 'message'
-    const [note, setNote] = useState<string>('');
-    const [message, setMessage] = useState<string>('');
+const PoseDetectionComponent = () => {
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const [model, setModel] = useState<tf.GraphModel | null>(null);
 
-    // Asynchronous function to save the note using axios to make a POST request
-    const saveNote = async () => {
-        try {
-            // Await the completion of the POST request to the specified API endpoint
-            await axios.post('http://localhost:5000/api/notes', { text: note });
-
-            // If successful, update the 'message' state with a success message
-            setMessage('Note saved successfully');
-        } catch (error) {
-            // If an error occurs during the POST request, update the 'message' state with an error message
-            setMessage('Error saving note');
-        }
+  useEffect(() => {
+    // Load the model when the component mounts
+    const loadModel = async () => {
+        await tf.ready();
+        const modelPath = 'http://localhost:5000/multipose-lightning';
+        const loadedModel = await tf.loadGraphModel(`${modelPath}/model.json`);
+        if (loadedModel == null) {
+            return;
+          }else{
+              // Set the model in the component state
+              setModel(loadedModel);
+              console.log(model);
+              return;
+          }
     };
 
-    // JSX rendering of the component
-    return (
-        <div>
-            {/* Display a heading */}
-            <h1>The CG MERN Stack with TypeScript Playground</h1>
+    // Initialize the camera and load the model
+    const setupCameraAndModel = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              loadModel();
+            }
+          } catch (error) {
+            console.error('Error accessing camera:', error);
+          }
+    };
+    setupCameraAndModel();
 
-            <div>
-                {/* Textarea for inputting the note, controlled by the 'note' state */}
-                <textarea
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Type your note here"
-                />
-            </div>
+  }, []); // Empty dependency array to run the effect only once
 
-            <div>
-                {/* Button to trigger the saveNote function when clicked */}
-                <button onClick={saveNote}>Save Note</button>
-            </div>
-
-            {/* Display the 'message' only if it is not an empty string */}
-            {message && <div>{message}</div>}
-        </div>
-    );
+  return (
+    <div>
+      <video ref={videoRef} autoPlay playsInline muted />
+      <div>
+        <h2>Pose Information</h2>
+        {/* Placeholder for displaying pose information */}
+      </div>
+    </div>
+  );
 };
 
-// Export the App component as the default export of this module
-export default App;
+export default PoseDetectionComponent;
