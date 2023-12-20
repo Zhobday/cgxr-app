@@ -8,6 +8,8 @@ const videoRef = useRef<HTMLVideoElement | null>(null);
 const canRef = useRef<HTMLCanvasElement | null>(null);
 
 const [poses, setPoses] = useState<any[]>([]);
+const [model, setModel] = useState<tf.GraphModel | null>(null);
+
 
 const detectPoses = async () => {
     try { 
@@ -44,6 +46,38 @@ const detectPoses = async () => {
 
   useEffect(() => {
 
+    const loadModel = async () => {
+      try {
+        // Check if the model is already in the cache
+        const cachedModelJson = sessionStorage.getItem('myModel');
+    
+        if (cachedModelJson !== null) {
+          console.log('Model found in cache.');
+          const cachedModel = JSON.parse(cachedModelJson);
+          setModel(cachedModel);
+        } else {
+          // Model is not in cache; load it
+          const modelPath = 'http://my-express-server/path/to/model';
+          const loadedModel = await tf.loadGraphModel(`${modelPath}/model.json`);
+          if (loadedModel == null) {
+            console.log('TS Could not load the model.');
+            return;
+          }
+          console.log('Model loaded successfully:', loadedModel);
+    
+          // Save the model in session storage for future use
+          sessionStorage.setItem('myModel', JSON.stringify(loadedModel));
+    
+          // Set the model in the component state
+          setModel(loadedModel);
+        }
+      } catch (error) {
+        console.error('Error loading model:', error);
+      }
+    };
+    
+
+
     const initCamera = async () => {
       try {
         await tf.ready();
@@ -59,6 +93,7 @@ const detectPoses = async () => {
       
     };
 
+    loadModel();
     initCamera();
     const intervalId = setInterval(detectPoses, 250);
 
