@@ -7,7 +7,7 @@ const PoseDetectionComponent = () => {
     const [model, setModel] = useState<tf.GraphModel | null>(null);
     const cr = useRef<HTMLCanvasElement | null>(null);
     const [poses, setPoses] = useState<any[]>([]);
-
+    const [capturedImageSrc, setCapturedImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
     // Load the model when the component mounts
@@ -68,13 +68,12 @@ const PoseDetectionComponent = () => {
         if (!context) {return;}
 
         // Get image data from the canvas
-        context.drawImage(video,0,0,video.width,video.height)
-        const imageData = context.getImageData(0, 0, video.videoWidth, video.videoHeight);
-        const tensor = tf.browser.fromPixels(imageData, 4); // Assuming RGBA format
-        var framePoses = model?.predict(tensor);
+        context.drawImage(video,0,0,canvas.width,canvas.height)
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.width);
+        const pixelData = imageData.data;
+        const dataUrl = canvas.toDataURL('image/png');
+        setCapturedImageSrc(dataUrl);
 
-        const framePosesArray = Array.isArray(framePoses) ? framePoses : [framePoses];
-        setPoses(framePosesArray);
       }
 
       // Call calculateSize initially and add a resize event listener
@@ -82,7 +81,7 @@ const PoseDetectionComponent = () => {
         await calculateSize();
         await setupCamera();
         await loadModel();
-        const intervalId = setInterval(() => detectPoses(),250);
+        const intervalId = setInterval(() => detectPoses(),1000);
         return () =>{
           clearInterval(intervalId)
         };
@@ -104,6 +103,12 @@ const PoseDetectionComponent = () => {
             <video ref={videoRef} autoPlay playsInline muted />
             <canvas ref={cr} />
         </div>
+        {capturedImageSrc && (
+        <div>
+          <h2>Captured Image</h2>
+          <img src={capturedImageSrc} alt="Captured Frame" />
+        </div>
+      )}
     <div>
         <h2>Pose Information</h2>
         {/* Placeholder for displaying pose information */}
