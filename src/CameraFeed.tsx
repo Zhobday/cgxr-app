@@ -90,7 +90,7 @@ const CameraFeed: React.FC = () => {
         // Do something with imageData (e.g., log it)
         console.log('Captured frame:', imageData);
   
-      }, 1000); // Interval in milliseconds (1000ms = 1 second)
+      }, 3000); // Interval in milliseconds (1000ms = 1 second)
   
       // Return cleanup function to clear the interval when needed
       return () => {
@@ -109,7 +109,7 @@ const CameraFeed: React.FC = () => {
         playsInline
         muted
       ></video>
-      <canvas ref={cr} />
+      <canvas ref={cr} hidden/>
       <div
         style={{
           position: 'absolute',
