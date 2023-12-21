@@ -13,8 +13,8 @@ const PoseDetectionComponent = () => {
     // Load the model when the component mounts
     const loadModel = async () => {
         await tf.ready();
-        const modelPath = 'http://localhost:5000/multipose-lightning/model.json';
-        const loadedModel = await tf.loadGraphModel(modelPath);
+        //const modelPath = 'http://localhost:5000/multipose-lightning/model.json';
+        const loadedModel = 1;//await tf.loadGraphModel(modelPath);
       
         if (loadedModel == null) {
           return;
@@ -40,7 +40,7 @@ const PoseDetectionComponent = () => {
             const dataUrl = canvas.toDataURL('image/png');
             setCapturedImageSrc(dataUrl);
 
-            // Do something with imageData (e.g., log it)
+            // Do something with imageData
             console.log('Captured frame:', imageData);
       
           }, 1000); // Interval in milliseconds (1000ms = 1 second)

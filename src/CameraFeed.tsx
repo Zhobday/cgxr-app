@@ -59,8 +59,8 @@ const CameraFeed: React.FC = () => {
 
   const loadModel = async () => {
     await tf.ready();
-    const modelPath = 'http://localhost:5000/multipose-lightning/model.json';
-    const loadedModel = await tf.loadGraphModel(modelPath);
+    //const modelPath = 'http://localhost:5000/multipose-lightning/model.json';
+    const loadedModel = 1; //await tf.loadGraphModel(modelPath);
     
     if (loadedModel == null) {
       return;
