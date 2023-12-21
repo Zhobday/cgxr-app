@@ -7,9 +7,8 @@ const CameraFeed: React.FC = () => {
   const cr = useRef<HTMLCanvasElement | null>(null);
   const [capturedImageSrc, setCapturedImageSrc] = useState<string | null>(null);
 
-  
-
   useEffect(() => {
+
     const initCamera = async () => {
       try {
         // Access the user's camera
@@ -81,8 +80,14 @@ const CameraFeed: React.FC = () => {
         }
   
         // Capture frame
+
+        const aspectRatio =  video.videoWidth / video.videoHeight;
+        const newWidth = Math.min(256, video.videoWidth);
+        const newHeight = Math.round(newWidth / aspectRatio);
+
+
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const imageData = context.getImageData(0, 0, newWidth, newHeight);
 
         const dataUrl = canvas.toDataURL('image/png');
         setCapturedImageSrc(dataUrl);
